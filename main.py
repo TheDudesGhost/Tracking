@@ -6,8 +6,7 @@ import histogram.util as h
 
 #import histo
 
-im=util.imread('./resource/einstein.jpg')
-hist,bins = h.histo(im)
+im=util.lena()
 h.plotHist(im)
 
 print(" I WON HAHA")
