@@ -2,9 +2,12 @@
 
 import numpy as np
 
+def histo(dataIn):
+    histo, bins = np.histogram(dataIn, 255)
+    return histo, bins
+
 # Affiche un histogramme créé par numpy
-def histOutline(dataIn, *args, **kwargs):
-    (histIn, binsIn) = np.histogram(dataIn, *args, **kwargs)
+def histOutline(histIn, binsIn):
     stepSize = binsIn[1] - binsIn[0]
 
     bins = np.zeros(len(binsIn)*2 + 2, dtype=np.float)
