@@ -2,6 +2,7 @@
 
 import scipy.misc as util # imread / imsave / imresize / lena
 import numpy as np
+
 import histogram.util as h
 
 #import histo
