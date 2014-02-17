@@ -19,30 +19,43 @@ def kernel(x, dim=2, normal=1):
         c = 4.0/3*pi
         kernel = np.multiply(x<1,1-x)*(0.5/c)*(dim+2)
     return kernel
+    
+# Calcul la fonction kernel au centre (cx,cy) pour l'image im
+def kernel_centre(im, cx, cy, normal=1):
+    H,W = im.shape    
+    X,Y = np.meshgrid(np.arange(-cx,W-cx),np.arange(-cy,H-cy))    
+    k = kernel(np.sqrt(np.multiply(X,X) + np.multiply(Y,Y)))
+    return k
 
-# Calcul de la distribution du modele par rapport a Z, centree en 0
-def distribution_model(im_model, z):
-    return qz
+# Histogramme pondere du modele par le kernel choisi
+# Kernel normal choisi par defaut
+def distribution_model(im_model, k=1):
+    H,W = im.shape    
+    X,Y = np.meshgrid(np.arange(0,W),np.arange(0,H))    
+    
+    if k==1:
+        ker = kernel()    
+    return q
 
 # Calcul de la distribution de la cible par rapport a Z, centree en y
-def distribution_cible(im_target, y, z):
+def distribution_cible(hist_target, y):
     # TODO : calculer la distribution par rapport a z en y    
-    return pz_y
+    return p_y
 
 # Coefficient de Bhattacharyya
-# @param : pz, qz, 2 histogrammes de même taille
+# @param : pz, qz, 2 histogrammes de meme taille
 # @return : b, valeur du coeffcient de Bhattacharyya
 def b_coeff (pz,qz):
     # pz & qz : 2 histogrammes a comparer
     p,q = np.matrix(pz),np.matrix(qz)
     assert(p.shape == q.shape)
-    b = (np.sqrt(p,q)).sum()
+    b = (np.sqrt(np.multiply(p,q))).sum()
     return b
     
 
 # Distance entre 2 histogrammes
 # Calcul via leur coeff de Bhattacharyya
-def distance (coeff_bhatta)
+def distance (coeff_bhatta):
     return sqrt(1 - coeff_bhatta)
     
 

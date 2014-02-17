@@ -4,8 +4,11 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
-def histo(dataIn):
-    histo, bins = np.histogram(dataIn, 255)
+def histo(dataIn, weights=None, bins=255, range_=(0,256)):
+    if weights is None:    
+        histo, bins = np.histogram(dataIn, bins, range_)
+    else :
+        histo, bins = np.histogram(dataIn, bins, range_, weights=weights)
     return histo, bins
 
 # Affiche un histogramme cree par numpy

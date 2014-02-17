@@ -10,4 +10,9 @@ import random as rand
 import matplotlib.pyplot as plt
 
 
+im = np.eye(15,4)
+ker = ms.kernel_centre(im,1,1)
+print ker
+
+#ms.b_coeff
 
