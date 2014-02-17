@@ -10,9 +10,12 @@ import random as rand
 import matplotlib.pyplot as plt
 
 
-im = np.eye(15,4)
-ker = ms.kernel_centre(im,1,1)
-print ker
+X,Y = np.meshgrid(np.arange(0,255), np.arange(0,255))
+im  = (X+Y)/2*((X-122)**2 + (Y-122)**2 <= 10)
+ker = ms.kernel_centre(im,122,122)
+
+histo = h.histo_roi_cercle(X,ker,122,122,10)
+
 
 #ms.b_coeff
 
