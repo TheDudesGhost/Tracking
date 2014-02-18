@@ -2,20 +2,30 @@
 
 import scipy.misc as util # imread / imsave / imresize / lena
 import numpy as np
-
-import histogram.util as h
-import mean_shift.func as ms
-
 import random as rand
 import matplotlib.pyplot as plt
 
-
-X,Y = np.meshgrid(np.arange(0,255), np.arange(0,255))
-im  = (X+Y)/2*((X-122)**2 + (Y-122)**2 <= 10)
-ker = ms.kernel_centre(im,122,122)
-
-histo = h.histo_roi_cercle(X,ker,122,122,10)
+import histogram.util as h
+import mean_shift.func as ms
+import mean_shift.base.kernel as ker
+import mean_shift.base.histogram as his
 
 
+
+
+
+#######################################################
+####################    TEST    ####################### 
+#######################################################
+
+X,Y = np.meshgrid(np.arange(0,50), np.arange(0,50))
+im  = X
+ker = ker.kernel_centre(im,25,25)
+histo = h.histo_roi_quad(X,ker,25,25,5,5)
+print histo
+plt.plot(im)
+plt.show()
 #ms.b_coeff
+
+
 
