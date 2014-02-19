@@ -5,10 +5,9 @@ import numpy as np
 import random as rand
 import matplotlib.pyplot as plt
 
-import histogram.util as h
 import mean_shift.func as ms
-import mean_shift.base.kernel as ker
-import mean_shift.base.histogram as his
+import mean_shift.base.kernel as bk
+import mean_shift.base.histogram as bh
 
 
 
@@ -18,13 +17,11 @@ import mean_shift.base.histogram as his
 ####################    TEST    ####################### 
 #######################################################
 
-X,Y = np.meshgrid(np.arange(0,50), np.arange(0,50))
-im  = X
-ker = ker.kernel_centre(im,25,25)
-histo = h.histo_roi_quad(X,ker,25,25,5,5)
-print histo
-plt.plot(im)
-plt.show()
+im = np.matrix([0])
+print im
+hist,bins = bh.histo(im,bins=32)
+print hist
+print bins
 #ms.b_coeff
 
 

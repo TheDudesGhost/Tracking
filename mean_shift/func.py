@@ -38,6 +38,14 @@ def distance (coeff_bhatta):
     return sqrt(1 - coeff_bhatta)
     
 
+# Coefficients utilises dans le mean shift
+# p et q : les 2 distributions (cible, modele)
+def weights (p,q,):
+    return 0
+
+# Principal Algorithme du programme
+#def b_maximization()
+
     
     
 ##############################################################################
@@ -48,9 +56,9 @@ def test_distrib():
     im = scipy.misc.lena()
     h1 = distribution(im,250,250,20)
     h2 = distribution(im,252,252,20)
-    h3 = distribution(im,100,100,20)
+    h3 = distribution(im,251,251,20)
     
-    b12 = b_coeff(h1,h1)
+    b12 = b_coeff(h1,h2)
     b13 = b_coeff(h1,h3)
     
     print b12, distance(b12)
