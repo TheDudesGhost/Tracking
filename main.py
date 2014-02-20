@@ -17,16 +17,10 @@ import mean_shift.base.histogram as bh
 ####################    TEST    ####################### 
 #######################################################
 
-im = np.arange(1,10,0.2)
-hist,bins = np.histogram(im,3,(0,10))
-
-print im
-print hist
-print bins
-
-b=bh.bin_please(4.5,bins)
-print hist[b]
-print b
+im = np.matrix([[1,2,3],[4,5,6],[7,8,9]])
+H,W = im.shape
+X,Y = np.meshgrid(np.arange(0,W),np.arange(0,H))
+print ''
 #ms.b_coeff
 
 

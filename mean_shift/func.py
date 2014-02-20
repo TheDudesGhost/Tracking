@@ -45,8 +45,11 @@ def weights (p,q,index):
     p = p.astype(float)
     return np.sqrt(q[index]/p[index])
 
-# Principal Algorithme du programme
-#def b_maximization()
+
+#Prediction du nouvel emplacement de y
+def prediction (roi,im,y0):
+    h = len(roi) # bandwidth    
+    return y
 
     
     
