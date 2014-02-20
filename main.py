@@ -9,6 +9,8 @@ import mean_shift.func as ms
 import mean_shift.base.kernel as bk
 import mean_shift.base.histogram as bh
 
+import geometry as geo
+
 
 
 
@@ -18,9 +20,9 @@ import mean_shift.base.histogram as bh
 #######################################################
 
 im = np.matrix([[1,2,3],[4,5,6],[7,8,9]])
-H,W = im.shape
-X,Y = np.meshgrid(np.arange(0,W),np.arange(0,H))
-print ''
+a,b = im*3,im*3
+print a
+print b
 #ms.b_coeff
 
 
