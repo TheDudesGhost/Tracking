@@ -18,8 +18,8 @@ import base.histogram as bh
 # Histogramme pondere du modele par le kernel choisi
 def distribution(im,cx,cy,r):
     ker = bk.kernel_centre(im,cx,cy)
-    histo = bh.histo_roi_cercle(im,ker,cx,cy,r)
-    return histo
+    histo,bins = bh.histo_roi_cercle(im,ker,cx,cy,r)
+    return histo,bins
 
 
 # Coefficient de Bhattacharyya
@@ -40,8 +40,10 @@ def distance (coeff_bhatta):
 
 # Coefficients utilises dans le mean shift
 # p et q : les 2 distributions (cible, modele)
-def weights (p,q,):
-    return 0
+# index = bh.bin_please ...
+def weights (p,q,index):
+    p = p.astype(float)
+    return np.sqrt(q[index]/p[index])
 
 # Principal Algorithme du programme
 #def b_maximization()
@@ -54,9 +56,10 @@ def weights (p,q,):
     
 def test_distrib():
     im = scipy.misc.lena()
-    h1 = distribution(im,250,250,20)
-    h2 = distribution(im,252,252,20)
-    h3 = distribution(im,251,251,20)
+    h1,b = distribution(im,250,250,20)
+    h2,b = distribution(im,252,252,20)
+    h3,b = distribution(im,251,251,20)
+
     
     b12 = b_coeff(h1,h2)
     b13 = b_coeff(h1,h3)
