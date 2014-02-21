@@ -14,11 +14,18 @@ import scipy.misc
 import base.kernel as bk          
 import base.histogram as bh
 
+import scipy.ndimage as ndimage
+
+
+
 
 # Histogramme pondere du modele par le kernel choisi
-def distribution(im,cx,cy,r):
+def distribution(im,cx,cy,roi):
+    radius = 20
+    roi_im = geo.roi_cercle(im,cx,cy,radius)[2]
     ker = bk.kernel_centre(im,cx,cy)
-    histo,bins = bh.histo_roi_cercle(im,ker,cx,cy,r)
+    roi_ker = geo.roi_cercle(ker,cx,cy,radius)[2]
+    histo,bins = bh.histo(roi_im,weights=roi_ker)   
     return histo,bins
 
 
@@ -26,9 +33,9 @@ def distribution(im,cx,cy,r):
 # @param : p, q, 2 histogrammes de meme taille
 # @return : b, valeur du coeffcient de Bhattacharyya
 def b_coeff (pz,qz):
-    p,q = np.matrix(pz),np.matrix(qz)
-    assert(p.shape == q.shape)
-    b = (np.sqrt(np.multiply(p,q))).sum()
+    pz,qz = np.array(pz),np.array(qz)
+    assert(pz.shape == qz.shape)
+    b = (np.sqrt(np.multiply(pz,qz))).sum()
     return b
     
 
@@ -43,13 +50,23 @@ def distance (coeff_bhatta):
 # index = bh.bin_please ...
 def weights (p,q,index):
     p = p.astype(float)
-    return np.sqrt(q[index]/p[index])
+    p = np.array(p) + 0.000001
+    q = np.array(q) + 0.000001
+    return np.sqrt(np.take(q,index)/np.take(p,index))
 
 
 #Prediction du nouvel emplacement de y
-def prediction (roi,im,y0):
-    h = len(roi) # bandwidth    
-    return y
+def prediction (im,posX,posY):
+    radius = 20
+    p,binsP = distribution(im,posX,posY,radius)
+    q,binsQ = distribution(im,200,320,radius)    
+    roiX,roiY,rawdata = geo.roi_cercle(im,posX,posY,radius)
+    h = roiX.shape[0]
+    weight = weights(p,q,bh.bin_please(rawdata,binsP))
+    #Calcul sur les X
+    newX = (np.multiply(np.multiply(roiX,weight),bk.kernel(np.multiply((posX-roiX)/h,(posX-roiX)/h)))).sum() / (np.multiply(weight,bk.kernel(np.multiply((posX-roiX)/h,(posX-roiX)/h)))).sum()
+    newY = (np.multiply(np.multiply(roiY,weight),bk.kernel(np.multiply((posY-roiY)/h,(posY-roiY)/h)))).sum() / (np.multiply(weight,bk.kernel(np.multiply((posY-roiY)/h,(posY-roiY)/h)))).sum()
+    return newX,newY
 
     
     
@@ -57,18 +74,28 @@ def prediction (roi,im,y0):
 ################################      TESTS       ############################
 ##############################################################################    
     
-def test_distrib():
-    im = scipy.misc.lena()
-    h1,b = distribution(im,250,250,20)
-    h2,b = distribution(im,252,252,20)
-    h3,b = distribution(im,251,251,20)
+def test_algo():
+    im = ndimage.imread('../2.pgm')
 
-    
-    b12 = b_coeff(h1,h2)
-    b13 = b_coeff(h1,h3)
-    
-    print b12, distance(b12)
-    print b13, distance(b13)
+    print prediction(im,200,320)
     
 if __name__ == "__main__":
-    test_distrib()
+    import sys
+    import os.path
+    sys.path.append(
+    os.path.abspath(os.path.join(os.path.dirname(__file__), os.path.pardir)))    
+    import geometry as geo    
+    
+    test_algo()
+    
+    
+
+else :
+    import geometry as geo
+    
+    
+    
+    
+    
+    
+    

@@ -25,7 +25,7 @@ def kernel(x, normal=1):
 def kernel_centre(im, cx, cy, normal=1):
     H,W = im.shape    
     X,Y = np.meshgrid(np.arange(-cx,W-cx),np.arange(-cy,H-cy))    
-    k = kernel(np.sqrt(np.multiply(X,X) + np.multiply(Y,Y)))
+    k = kernel(np.multiply(X,X) + np.multiply(Y,Y))
     return k
     
     

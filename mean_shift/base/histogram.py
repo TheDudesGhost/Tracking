@@ -4,9 +4,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
-def histo(dataIn, weights=None, bins=256, range_=(0,256)):
-    assert(dataIn is not None)
-    histo, bins = np.histogram(dataIn, bins, range_, weights=weights, density=True)
+def histo(dataIn, weights=None, bins=40, range_=(0,256)):
+    histo, bins = np.histogram(dataIn, bins, range_, weights=weights)
+    #histo = histo/ histo.sum()
     return histo, bins
 
 # Affiche un histogramme cree par numpy
@@ -20,9 +20,13 @@ def histo_roi_cercle(im,weights,cx,cy,r):
     H,W = im.shape    
     assert(cx+r <= W-1 and cx-r >= 0)
     assert(cy+r <= H-1 and cy-r >= 0)
-    X,Y = np.meshgrid(np.arange(0,W),np.arange(0,H))    
-    weights_roi = weights * (((X-cx)**2 + (Y-cy)**2) <= (r**2 + 1))    
-    histo_roi,bins = histo(im, weights=weights_roi)
+    X,Y = np.meshgrid(np.arange(0,W),np.arange(0,H))
+    if weights==None :
+        weights_roi = 1 * (((X-cx)**2 + (Y-cy)**2) <= (r**2 + 1))
+        histo_roi,bins = histo(im, weights=weights_roi)
+    else :
+        weights_roi = weights * (((X-cx)**2 + (Y-cy)**2) <= (r**2 + 1))    
+        histo_roi,bins = histo(im, weights=weights_roi)
     return histo_roi,bins
     
     
@@ -38,8 +42,12 @@ def histo_roi_quad(im,weights,cx,cy,h,w):
 
 # Retourne l'index du bin auquel appartiemt la couleur
 def bin_please(couleur,bins):
-    tmp = (bins <= couleur)
-    return tmp.sum()-1
+    result = []
+
+    for i,coul in enumerate(couleur):
+        tmp = (bins <= coul)
+        result.append(tmp.sum()-1)
+    return result
 
 ##############################################################################
 ################################      TESTS       ############################
