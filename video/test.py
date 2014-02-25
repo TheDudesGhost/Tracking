@@ -6,23 +6,26 @@ import cv2
 import cv2.cv as cv
 import numpy as np
 
-from geometry import *
+from math import sqrt
 
-def is_rect_nonzero(r):
-    (_,_,w,h) = r
-    return (w > 0) and (h > 0)
+def is_radius_nonzero(r):
+    (_,_,radius) = r
+    return (radius > 0)
+
+def distance(a, b):
+    return sqrt((b[0]-a[0])**2 + (b[1]-a[1])**2)
 
 class Video:
     
     def __init__(self, path):
         self.path = path
-        cv.NamedWindow( "Demo", 1 )
+        cv2.namedWindow( "Demo", 1 )
         
         cv.SetMouseCallback("Demo", self.on_mouse)
         
         self.drag_start = None
         self.track_window = None
-        self.selection = (0,0,0,0)
+        self.selection = (0,0,0)
     
     def on_mouse(self, event, x, y, flags, param):
         if event == cv.CV_EVENT_LBUTTONDOWN:
@@ -31,13 +34,11 @@ class Video:
             self.drag_start = None
             self.track_window = self.selection
         if self.drag_start:
-            xmin = min(x, self.drag_start[0])
-            ymin = min(y, self.drag_start[1])
-            xmax = max(x, self.drag_start[0])
-            ymax = max(y, self.drag_start[1])
-            self.selection = (xmin, ymin, xmax - xmin, ymax - ymin)
+            posX, posY = self.drag_start
+            radius = distance(self.drag_start, (x, y))
+            self.selection = (posX, posY, radius)
 
-    def toto(self):
+    def process(self):
         # setup video capture
         cap = cv2.VideoCapture(self.path)
         
@@ -51,29 +52,29 @@ class Video:
             # If mouse is pressed, highlight the current selected rectangle
             # and recompute the histogram
     
-            if self.drag_start and is_rect_nonzero(self.selection):
-                frame = cv.fromarray(im)
-                sub = cv.GetSubRect(frame, self.selection)
-                save = cv.CloneMat(sub)
-                save = cv.fromarray(cv2.GaussianBlur(np.array(save), (0, 0), 5))
-                cv.ConvertScale(frame, frame, 0.5)
+            if self.drag_start and is_radius_nonzero(self.selection):
+                # On est en train de sélectionner la zone                
+                
+                #frame = cv.fromarray(im) # Convertit des données np en cv
+                #sub = cv.GetSubRect(frame, self.selection)
+                #save = cv.CloneMat(sub)
+                #save = cv.fromarray(cv2.GaussianBlur(np.array(save), (0, 0), 5))
+                #cv.ConvertScale(frame, frame, 0.5)
                 
                 
-                cv.Copy(save, sub)
-                x,y,w,h = self.selection
+                #cv.Copy(save, sub)
+                x,y,radius = self.selection
 
-                cv.Rectangle(frame, (x,y), (x+w,y+h), (255,255,255))
-                frame = np.array(frame)
-            elif is_rect_nonzero(self.selection):
-                frame = cv.fromarray(im)
-                sub = cv.GetSubRect(frame, self.selection)
-                save = cv.CloneMat(sub)
-                save = cv.fromarray(cv2.GaussianBlur(np.array(save), (0, 0), 5))
-                cv.Copy(save, sub)
-                frame = np.array(frame)
+                cv2.circle(im, (x,y), int(radius), (255,255,255))
+            elif is_radius_nonzero(self.selection):
+                # Ici la sélection est faite
+
+                x,y,radius = self.selection
+
+                cv2.circle(im, (x,y), int(radius), (255,255,255))                
             else:
-                frame = im
-                
+                # Rien n'a jamais été selectionné
+                None
             #elif self.track_window and is_rect_nonzero(self.track_window):
             #    cv.EllipseBox( frame, track_box, cv.CV_RGB(255,0,0), 3, cv.CV_AA, 0 )
     
@@ -81,7 +82,7 @@ class Video:
             #im = cv2.GaussianBlur(im, (0, 0), 5)
     
             # Display
-            cv2.imshow('Demo', frame)
+            cv2.imshow('Demo', im)
             
             # Use Q to quit
             if cv2.waitKey(25) & 0xFF == ord('q'):
@@ -96,7 +97,7 @@ class Video:
     
 def test_video(path):
     video = Video(path)
-    video.toto()
+    video.process()
     #toto(0)
     
     cv2.destroyAllWindows()
