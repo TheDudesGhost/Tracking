@@ -49,10 +49,11 @@ class Video:
         while(cap.isOpened()):
             if not pause:
                 ret, im = cap.read()
+                if not ret:
+                    break
             else:
-                im = tmp
-            if not ret:
-                break
+                im = np.array(tmp)
+                print "pause"
             # The frame is in im
             
             # If mouse is pressed, highlight the current selected rectangle
@@ -67,9 +68,6 @@ class Video:
                 #save = cv.fromarray(cv2.GaussianBlur(np.array(save), (0, 0), 5))
                 #cv.ConvertScale(frame, frame, 0.5)
                 
-                if pause:
-                    tmp = im                
-                
                 #cv.Copy(save, sub)
                 x,y,radius = self.selection
 
@@ -83,6 +81,7 @@ class Video:
             else:
                 # Rien n'a jamais été selectionné
                 None
+
             #elif self.track_window and is_rect_nonzero(self.track_window):
             #    cv.EllipseBox( frame, track_box, cv.CV_RGB(255,0,0), 3, cv.CV_AA, 0 )
     
