@@ -42,9 +42,15 @@ class Video:
         # setup video capture
         cap = cv2.VideoCapture(self.path)
         
+        pause = False
+        tmp = None
+        
         # get frame, store in array
         while(cap.isOpened()):
-            ret, im = cap.read()
+            if not pause:
+                ret, im = cap.read()
+            else:
+                im = tmp
             if not ret:
                 break
             # The frame is in im
@@ -61,6 +67,8 @@ class Video:
                 #save = cv.fromarray(cv2.GaussianBlur(np.array(save), (0, 0), 5))
                 #cv.ConvertScale(frame, frame, 0.5)
                 
+                if pause:
+                    tmp = im                
                 
                 #cv.Copy(save, sub)
                 x,y,radius = self.selection
@@ -83,10 +91,16 @@ class Video:
     
             # Display
             cv2.imshow('Demo', im)
+
+            key = cv2.waitKey(25) & 0xFF          
             
             # Use Q to quit
-            if cv2.waitKey(25) & 0xFF == ord('q'):
+            if key == ord('q'):
                 break
+            if key == ord(' '):
+                pause = not pause
+                if pause:
+                    tmp = im 
         
         cap.release()
 
