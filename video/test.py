@@ -6,7 +6,7 @@ import cv2
 import cv2.cv as cv
 import numpy as np
 
-from geometry import *
+
 
 def is_rect_nonzero(r):
     (_,_,w,h) = r

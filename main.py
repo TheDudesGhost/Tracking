@@ -1,6 +1,7 @@
 #! /usr/bin/python2.7
 
 import scipy.misc as util # imread / imsave / imresize / lena
+
 import numpy as np
 import random as rand
 import matplotlib.pyplot as plt
@@ -36,8 +37,12 @@ def test_mean_shift ():
     
 #test_mean_shift()
 
+im = util.imread('./resource/me.jpg')  
+histo,bins = np.histogram(im,bins=32)
+plt.plot(histo)
+plt.show()
 
-ms.test_algo()   
+print histo,bins
 
 
 

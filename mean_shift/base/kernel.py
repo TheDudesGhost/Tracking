@@ -28,17 +28,3 @@ def kernel_centre(im, cx, cy, normal=1):
     k = kernel(np.multiply(X,X) + np.multiply(Y,Y))
     return k
     
-    
-
-def kernel_g(x, normal=1):
-    if normal==1: # normal
-        kernel =  np.exp(-0.5*x)
-    else : # Epanechnikov
-        #c = 4.0/3*pi
-        kernel = np.multiply(x<1,1-x)
-    
-    if kernel.sum() != 0 :
-        kernel = kernel / kernel.sum() # Normallisation du kernel
-    else :
-        kernel = np.zeros(kernel.shape)
-    return kernel
