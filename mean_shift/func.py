@@ -10,7 +10,7 @@ from math import *
 import matplotlib.pyplot as plt
 import numpy as np
 import scipy.misc
-
+from pylab import *
 import base.kernel as bk          
 import base.histogram as bh
 
@@ -20,22 +20,21 @@ radius = 20
 
 
 # Histogramme pondere du modele par le kernel choisi
-def distribution(im,cx,cy,raw_ker):
-    rawdata = geo.roi_cercle(im,cx,cy,radius, raw=1)[2]
-    print rawdata.shape,raw_ker.shape
+def distribution(im,ci,cj,raw_ker):
+    rawdata = geo.roi_cercle(im,ci,cj,radius, raw=1)[2]
     histo,bins = bh.histo(rawdata,weights=raw_ker)   
     return histo,bins
 
 # Test OK
-def distribution_RGB(im_rgb,cx,cy):
+def distribution_RGB(im_rgb,ci,cj):
     # Calcul du kernel
-    ker = bk.kernel_centre(im_rgb[:,:,0],cx,cy)
+    ker = bk.kernel_centre(im_rgb[:,:,0],ci,cj)
     
-    raw_ker = geo.roi_cercle(ker,cx,cy,radius, raw=1)[2]
+    raw_ker = geo.roi_cercle(ker,ci,cj,radius, raw=1)[2]
     # Calcul des distributions    
-    histo_R, bins = distribution(im_rgb[:,:,0],cx,cy,raw_ker) 
-    histo_G, bins = distribution(im_rgb[:,:,1],cx,cy,raw_ker)
-    histo_B, bins = distribution(im_rgb[:,:,2],cx,cy,raw_ker)
+    histo_R, bins = distribution(im_rgb[:,:,0],ci,cj,raw_ker) 
+    histo_G, bins = distribution(im_rgb[:,:,1],ci,cj,raw_ker)
+    histo_B, bins = distribution(im_rgb[:,:,2],ci,cj,raw_ker)
     return [histo_R,histo_G,histo_B], bins
 
 # Coefficient de Bhattacharyya
@@ -77,43 +76,43 @@ def weights_RGB (p,q,index):
 
 
 #Prediction du nouvel emplacement de y
-def prediction (im,posX,posY):
-    p,binsP = distribution(im,posX,posY)
+def prediction (im,posI,posJ):
+    p,binsP = distribution(im,posI,posJ)
     q,binsQ = distribution(im,200,320)    
-    roiX,roiY,rawdata = geo.roi_cercle(im,posX,posY,radius)
-    h = roiX.shape[0]
+    roiI,roiJ,rawdata = geo.roi_cercle(im,posI,posJ,radius)
+    h = roiI.shape[0]
     weight = weights(p,q,bh.bin_please(rawdata,binsP))
     #Calcul sur les X
-    newX = (np.multiply(np.multiply(roiX,weight),bk.kernel(np.multiply((posX-roiX)/h,(posX-roiX)/h)))).sum() / (np.multiply(weight,bk.kernel(np.multiply((posX-roiX)/h,(posX-roiX)/h)))).sum()
-    newY = (np.multiply(np.multiply(roiY,weight),bk.kernel(np.multiply((posY-roiY)/h,(posY-roiY)/h)))).sum() / (np.multiply(weight,bk.kernel(np.multiply((posY-roiY)/h,(posY-roiY)/h)))).sum()
-    return newX,newY
+    newI = (np.multiply(np.multiply(roiI,weight),bk.kernel(np.multiply((posI-roiI)/h,(posI-roiI)/h)))).sum() / (np.multiply(weight,bk.kernel(np.multiply((posI-roiI)/h,(posI-roiI)/h)))).sum()
+    newJ = (np.multiply(np.multiply(roiJ,weight),bk.kernel(np.multiply((posJ-roiJ)/h,(posJ-roiJ)/h)))).sum() / (np.multiply(weight,bk.kernel(np.multiply((posJ-roiJ)/h,(posJ-roiJ)/h)))).sum()
+    return newI,newJ
 
     
-def prediction_RGB(im, model, posX, posY):
-    oldX,oldY = posX,posY
+def prediction_RGB(im, model, posI, posJ):
+    oldI,oldJ = posI,posJ
     # Distributions (histogrammes) & Bhattacharyya 
-    p,bins = distribution_RGB(im,posX,posY)
+    p,bins = distribution_RGB(im,posI,posJ)
     q,bins = distribution_RGB(model,374,456)
     old_coeff = b_coeff_RGB(p,q)    
     # Weights
-    roiX,roiY,rawR = geo.roi_cercle(im[:,:,0],posX,posY,radius) # roiX -> colonnes
-    rawG = geo.roi_cercle(im[:,:,0],posX,posY,radius,raw=1)[2]
-    rawB = geo.roi_cercle(im[:,:,0],posX,posY,radius,raw=1)[2]
-    h = roiX.shape[0]
+    roiI,roiJ,rawR = geo.roi_cercle(im[:,:,0],posI,posJ,radius) # roiI -> colonnes
+    rawG = geo.roi_cercle(im[:,:,0],posI,posJ,radius,raw=1)[2]
+    rawB = geo.roi_cercle(im[:,:,0],posI,posJ,radius,raw=1)[2]
+    h = roiI.shape[0]
     weight = weights(p,q,bh.bin_RGB([rawR,rawG,rawB],bins))
     # Update Y1
-    newX = (np.multiply(np.multiply(roiX,weight),bk.kernel(np.multiply((posX-roiX)/h,(posX-roiX)/h)))).sum() / (np.multiply(weight,bk.kernel(np.multiply((posX-roiX)/h,(posX-roiX)/h)))).sum()
-    newY = (np.multiply(np.multiply(roiY,weight),bk.kernel(np.multiply((posY-roiY)/h,(posY-roiY)/h)))).sum() / (np.multiply(weight,bk.kernel(np.multiply((posY-roiY)/h,(posY-roiY)/h)))).sum()
-    newX, newY = int(newX), int(newY)    
+    newI = (np.multiply(np.multiply(roiI,weight),bk.kernel(np.multiply((posI-roiI)/h,(posI-roiI)/h)))).sum() / (np.multiply(weight,bk.kernel(np.multiply((posI-roiI)/h,(posI-roiI)/h)))).sum()
+    newJ = (np.multiply(np.multiply(roiJ,weight),bk.kernel(np.multiply((posJ-roiJ)/h,(posJ-roiJ)/h)))).sum() / (np.multiply(weight,bk.kernel(np.multiply((posJ-roiJ)/h,(posJ-roiJ)/h)))).sum()
+    newI, newJ = int(newI), int(newJ)    
     # Test
-    p,bins = distribution_RGB(im,newX,newY)
+    p,bins = distribution_RGB(im,newI,newJ)
     new_coeff = b_coeff_RGB(p,q)
-    while new_coeff < old_coeff and ((newX-oldX)**2 + (newY-oldY)**2)>3:
-        newX, newY = int(0.5*(newX+oldX)), int(0.5*(newY+oldY))
-        p,bins = distribution_RGB(im,newX,newY)
+    while new_coeff < old_coeff and ((newI-oldI)**2 + (newJ-oldJ)**2)>3:
+        newI, newJ = int(0.5*(newI+oldI)), int(0.5*(newJ+oldJ))
+        p,bins = distribution_RGB(im,newI,newJ)
         new_coeff = b_coeff_RGB(p,q)
     
-    return newX,newY
+    return newI,newJ
     
 
     
@@ -125,17 +124,11 @@ def prediction_RGB(im, model, posX, posY):
 ##############################################################################    
     
 def test_algo():
-    im = ndimage.imread('../resource/me.jpg')
-    test = im[:,:,0] *0   
-    q,bins = distribution_RGB(im,374,456)
-    
-    for i in range(370,380):
-        for j in range(450,460):
-            print i,j
-            p,bins = distribution_RGB(im,i,j)
-            test[i,j] = b_coeff_RGB (p,q)
-    
-    plt.imshow(test)
+    J,I = np.meshgrid(np.arange(-50,51),np.arange(-50,51))
+    J,I = 100-np.abs(J),100-np.abs(I)
+    im = np.multiply(I,J)
+      
+    plt.imshow(im)
     plt.show()
 
     
@@ -148,10 +141,9 @@ if __name__ == "__main__":
     
     test_algo()
 #    im = ndimage.imread('../resource/me.jpg')
-#    x,y = 380,452
-#    for i in range(30):    
-#        x,y = prediction_RGB(im,im,x,y)
-#        print x,y
+#    i,j = 480,370    
+#    i,j = prediction_RGB(im,im,i,j)
+#    print i,j
     
     
 

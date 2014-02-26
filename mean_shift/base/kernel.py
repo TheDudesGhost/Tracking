@@ -6,6 +6,7 @@ Contient les fonctions de caclcul des kernels
 """
 
 import numpy as np
+import matplotlib.pyplot as plt
 
 # Definition du kernel utilise, Epanechnikov ou Gaussien
 def kernel(x, normal=1):
@@ -22,9 +23,17 @@ def kernel(x, normal=1):
     return kernel
     
 # Calcul la fonction kernel au centre (cx,cy) pour l'image im
-def kernel_centre(im, cx, cy, normal=1):
+def kernel_centre(im, ci, cj, normal=1):
     H,W = im.shape    
-    X,Y = np.meshgrid(np.arange(-cx,W-cx),np.arange(-cy,H-cy))    
-    k = kernel(np.multiply(X,X) + np.multiply(Y,Y))
+    J,I = np.meshgrid(np.arange(-cj,W-cj),np.arange(-ci,H-ci))    
+    k = kernel((np.multiply(I,I) + np.multiply(J,J)),normal)
     return k
     
+    
+
+    
+if __name__ == "__main__":
+    im = np.zeros((25,25))
+    ker = kernel_centre(im,12,12)
+    plt.imshow(ker)
+    plt.show()
