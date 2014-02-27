@@ -75,6 +75,9 @@ class Video:
     
     def isOpened(self):
         return self.cap.isOpened()
+        
+    def isPaused(self):
+        return self.pause
     
     def setSelection(self, i, j, r):
         self.selection = (i, j, r)
@@ -109,7 +112,7 @@ def test_video(path):
         # TODO Uncomment when computation is done
         # video.setSelection(i, j, r)  
         
-        video.setPrev(im)
+        video.setPrevious(im)
         
         if not video.check_event(im):
             break
