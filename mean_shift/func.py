@@ -91,17 +91,19 @@ def prediction (im,posI,posJ):
     return newI,newJ
 
     
-def prediction_RGB(im, model, posI, posJ):
+def prediction_RGB(im, model, posI, posJ,radius,oI,oJ):
     oldI,oldJ = posI,posJ
     # Distributions (histogrammes) & Bhattacharyya 
-    roi = geo.region.roi_cercle(im,posI,posJ,roi)
+    roi = geo.region.roi_cercle(im[:,:,0],posI,posJ,radius)
     p,bins = distribution_RGB(im,posI,posJ,roi)
-    q,bins = distribution_RGB(model,374,456,roi)
+    q,bins = distribution_RGB(model,oI,oJ,roi)
     old_coeff = b_coeff_RGB(p,q)    
     # Weights
-    roiI,roiJ,rawR = geo.roi_cercle(im[:,:,0],posI,posJ,radius) # roiI -> colonnes
-    rawG = geo.roi_cercle(im[:,:,0],posI,posJ,radius,raw=1)[2]
-    rawB = geo.roi_cercle(im[:,:,0],posI,posJ,radius,raw=1)[2]
+    
+    roiI,roiJ = geo.roi(im[:,:,0],roi)
+    rawR = geo.rawdata(im[:,:,0],roi) # roiI -> colonnes
+    rawG = geo.rawdata(im[:,:,1],roi)
+    rawB = geo.rawdata(im[:,:,2],roi)
     h = roiI.shape[0]
     weight = weights(p,q,bh.bin_RGB([rawR,rawG,rawB],bins))
     # Update Y1
@@ -109,7 +111,8 @@ def prediction_RGB(im, model, posI, posJ):
     newJ = (np.multiply(np.multiply(roiJ,weight),bk.kernel(np.multiply((posJ-roiJ)/h,(posJ-roiJ)/h)))).sum() / (np.multiply(weight,bk.kernel(np.multiply((posJ-roiJ)/h,(posJ-roiJ)/h)))).sum()
     newI, newJ = int(newI), int(newJ)    
     # Test
-    p,bins = distribution_RGB(im,newI,newJ)
+    roi = geo.region.roi_cercle(im[:,:,0],newI,newJ,radius)
+    p,bins = distribution_RGB(im,newI,newJ,roi)
     new_coeff = b_coeff_RGB(p,q)
     while new_coeff < old_coeff and ((newI-oldI)**2 + (newJ-oldJ)**2)>3:
         newI, newJ = int(0.5*(newI+oldI)), int(0.5*(newJ+oldJ))
@@ -128,11 +131,11 @@ def prediction_RGB(im, model, posI, posJ):
 ##############################################################################    
     
 def test_algo():
-    im = util.imread('../resource/test.pgm')
+    im = util.imread('../resource/me.jpg')
     im=im.astype(float)
     posI,posJ = 45,50
     
-    print prediction(im,posI,posJ)
+    print prediction_RGB(im,im,posI,posJ,radius,50,50)
 
     
 if __name__ == "__main__":
