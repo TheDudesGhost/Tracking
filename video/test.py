@@ -105,4 +105,4 @@ def test_video(path):
     video.end()
     
 if __name__ == "__main__":
-    test_video('../resource/car.mp4')
+    test_video('../resource/Juggling.mp4')
