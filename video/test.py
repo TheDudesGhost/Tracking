@@ -31,6 +31,7 @@ class Video:
         self.cap = cv2.VideoCapture(self.path)
         self.pause = False
         self.tmp = None
+        self.prev = None
     
     def on_mouse(self, event, x, y, flags, param):
         if event == cv.CV_EVENT_LBUTTONDOWN:
@@ -81,6 +82,15 @@ class Video:
     def end(self):
         self.cap.release()
         cv2.destroyAllWindows()
+    
+    def getSelection(self):
+        return self.selection
+    
+    def getPrevious(self):
+        return self.prev
+    
+    def setPrevious(self, im):
+        self.prev = im
 
 ##############################################################################
 ################################      TESTS       ############################
@@ -97,7 +107,9 @@ def test_video(path):
         # TODO Make computation 
         
         # TODO Uncomment when computation is done
-        # video.setSelection(i, j, r)        
+        # video.setSelection(i, j, r)  
+        
+        video.setPrev(im)
         
         if not video.check_event(im):
             break
