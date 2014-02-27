@@ -91,12 +91,11 @@ def prediction (im,posI,posJ):
     return newI,newJ
 
     
-def prediction_RGB(im, model, posI, posJ,radius,oI,oJ):
+def prediction_RGB(im, posI, posJ,radius,q):
     oldI,oldJ = posI,posJ
     # Distributions (histogrammes) & Bhattacharyya 
     roi = geo.region.roi_cercle(im[:,:,0],posI,posJ,radius)
     p,bins = distribution_RGB(im,posI,posJ,roi)
-    q,bins = distribution_RGB(model,oI,oJ,roi)
     old_coeff = b_coeff_RGB(p,q)    
     # Weights
     
@@ -134,9 +133,10 @@ def test_algo():
     im = util.imread('../resource/me.jpg')
     im=im.astype(float)
     posI,posJ = 45,50
-    
-    print prediction_RGB(im,im,posI,posJ,radius,50,50)
-
+    oldI,oldJ = 50,50
+    roi = geo.region.roi_cercle(im[:,:,0],oldI,oldJ,radius)   
+    q,bins = distribution_RGB(im,oldI,oldJ,roi)
+    posI,posJ = prediction_RGB(im,posI,posJ,radius,q)
     
 if __name__ == "__main__":
     import sys

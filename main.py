@@ -10,40 +10,33 @@ import mean_shift.func as ms
 import mean_shift.base.kernel as bk
 import mean_shift.base.histogram as bh
 
-#import geometry
+import geometry as geo
+import video as v
 
-
-def test_mean_shift ():
-    im = util.lena()    
+video = v.Video('./resource/Juggling.mp4')
+while(video.isOpened()):
+    ret, im = video.getFrame()
+    if not ret:
+        break
+    video.display_roi(im)
+    video.display(im)
+    # TODO Make computation
+    if v.is_radius_nonzero(video.selection):
+        i,j,r = video.selection
         
-    roiX,roiY,raw = geo.roi_cercle(im,250,250,5)
-    ker = bk.kernel_centre(im,250,250)
-    roi_ker = geo.roi_cercle(ker,250,250,5)[2]
-    histo1,bins1 = bh.histo(raw,weights=roi_ker)
-    histo2,bins2 = bh.histo_roi_cercle(im,ker,250,250,5)
+        posI,posJ = 45,50
+        oldI,oldJ = 50,50
+        roi = geo.region.roi_cercle(im[:,:,0],oldI,oldJ,radius)   
+        q,bins = distribution_RGB(im,oldI,oldJ,roi)
+        posI,posJ = prediction_RGB(im,posI,posJ,radius,q)
+        prediction_RGB(im, im,i,j,r,i,j)
+    # TODO Uncomment when computation is done
+    # video.setSelection(i, j, r)        
     
-    print histo2
-    print histo1    
-    
-    plt.subplot(311)
-    plt.plot(histo1)
-    plt.subplot(312)
-    plt.plot(histo2)
-    plt.subplot(313)
-    plt.plot(histo1 - histo2)
-    
-    plt.show()
-    return 0
-    
-#test_mean_shift()
+    if not video.check_event(im):
+        break
 
-im = util.imread('./resource/me.jpg')  
-histo,bins = np.histogram(im,bins=32)
-plt.plot(histo)
-plt.show()
-
-print histo,bins
-
+video.end()
 
 
 
