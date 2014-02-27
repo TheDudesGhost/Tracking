@@ -8,8 +8,8 @@ import numpy as np
 
 from math import sqrt
 
-def is_radius_nonzero(r):
-    (_,_,radius) = r
+def is_radius_nonzero(selection):
+    (_,_,radius) = selection
     return (radius > 0)
 
 def distance(a, b):
@@ -17,15 +17,20 @@ def distance(a, b):
 
 class Video:
     
-    def __init__(self, path):
+    def __init__(self, path, windowName = "Demo"):
         self.path = path
-        cv2.namedWindow( "Demo", 1 )
+        self.wName = windowName
+        cv2.namedWindow(self.wName, 1)
         
-        cv.SetMouseCallback("Demo", self.on_mouse)
+        cv.SetMouseCallback(self.wName, self.on_mouse)
         
         self.drag_start = None
         self.track_window = None
         self.selection = (0,0,0)
+
+        self.cap = cv2.VideoCapture(self.path)
+        self.pause = False
+        self.tmp = None
     
     def on_mouse(self, event, x, y, flags, param):
         if event == cv.CV_EVENT_LBUTTONDOWN:
@@ -38,71 +43,44 @@ class Video:
             radius = distance(self.drag_start, (x, y))
             self.selection = (posX, posY, radius)
 
-    def process(self):
-        # setup video capture
-        cap = cv2.VideoCapture(self.path)
-        
-        pause = False
-        tmp = None
-        
-        # get frame, store in array
-        while(cap.isOpened()):
-            if not pause:
-                ret, im = cap.read()
-                if not ret:
-                    break
+    def getFrame(self):
+        if self.cap.isOpened():
+            if not self.pause:
+                return self.cap.read()
             else:
-                im = np.array(tmp)
-                print "pause"
-            # The frame is in im
-            
-            # If mouse is pressed, highlight the current selected rectangle
-            # and recompute the histogram
+                return True, np.array(self.tmp)
     
-            if self.drag_start and is_radius_nonzero(self.selection):
-                # On est en train de sélectionner la zone                
+    def display_roi(self, im):
+        if is_radius_nonzero(self.selection):
+                # Une zone a ete selectionnee dans le passe                
+                i, j, radius = self.selection
                 
-                #frame = cv.fromarray(im) # Convertit des données np en cv
-                #sub = cv.GetSubRect(frame, self.selection)
-                #save = cv.CloneMat(sub)
-                #save = cv.fromarray(cv2.GaussianBlur(np.array(save), (0, 0), 5))
-                #cv.ConvertScale(frame, frame, 0.5)
-                
-                #cv.Copy(save, sub)
-                x,y,radius = self.selection
+                cv2.circle(im, (i, j), int(radius), (255,255,255))
 
-                cv2.circle(im, (x,y), int(radius), (255,255,255))
-            elif is_radius_nonzero(self.selection):
-                # Ici la sélection est faite
-
-                x,y,radius = self.selection
-
-                cv2.circle(im, (x,y), int(radius), (255,255,255))                
-            else:
-                # Rien n'a jamais été selectionné
-                None
-
-            #elif self.track_window and is_rect_nonzero(self.track_window):
-            #    cv.EllipseBox( frame, track_box, cv.CV_RGB(255,0,0), 3, cv.CV_AA, 0 )
+    def display(self, im):
+        cv2.imshow(self.wName, im)
     
-            #make process here
-            #im = cv2.GaussianBlur(im, (0, 0), 5)
-    
-            # Display
-            cv2.imshow('Demo', im)
-
-            key = cv2.waitKey(25) & 0xFF          
+    def check_event(self, im):
+        key = cv2.waitKey(25) & 0xFF          
             
-            # Use Q to quit
-            if key == ord('q'):
-                break
-            if key == ord(' '):
-                pause = not pause
-                if pause:
-                    tmp = im 
-        
-        cap.release()
-
+        # Use Q to quit
+        if key == ord('q'):
+            return False
+        if key == ord(' '):
+            self.pause = not self.pause
+            if self.pause:
+                self.tmp = im
+        return True
+    
+    def isOpened(self):
+        return self.cap.isOpened()
+    
+    def setSelection(self, i, j, r):
+        self.selection = (i, j, r)
+    
+    def end(self):
+        self.cap.release()
+        cv2.destroyAllWindows()
 
 ##############################################################################
 ################################      TESTS       ############################
@@ -110,10 +88,21 @@ class Video:
     
 def test_video(path):
     video = Video(path)
-    video.process()
-    #toto(0)
+    while(video.isOpened()):
+        ret, im = video.getFrame()
+        if not ret:
+            break
+        video.display_roi(im)
+        video.display(im)
+        # TODO Make computation 
+        
+        # TODO Uncomment when computation is done
+        # video.setSelection(i, j, r)        
+        
+        if not video.check_event(im):
+            break
     
-    cv2.destroyAllWindows()
+    video.end()
     
 if __name__ == "__main__":
     test_video('../resource/car.mp4')
