@@ -92,6 +92,7 @@ def prediction (im,posI,posJ):
 
     
 def prediction_RGB(im, posI, posJ,radius,q):
+    im = im.astype(float)
     oldI,oldJ = posI,posJ
     # Distributions (histogrammes) & Bhattacharyya 
     roi = geo.region.roi_cercle(im[:,:,0],posI,posJ,radius)
@@ -104,7 +105,7 @@ def prediction_RGB(im, posI, posJ,radius,q):
     rawG = geo.rawdata(im[:,:,1],roi)
     rawB = geo.rawdata(im[:,:,2],roi)
     h = roiI.shape[0]
-    weight = weights(p,q,bh.bin_RGB([rawR,rawG,rawB],bins))
+    weight = weights_RGB(p,q,bh.bin_RGB([rawR,rawG,rawB],bins))
     # Update Y1
     newI = (np.multiply(np.multiply(roiI,weight),bk.kernel(np.multiply((posI-roiI)/h,(posI-roiI)/h)))).sum() / (np.multiply(weight,bk.kernel(np.multiply((posI-roiI)/h,(posI-roiI)/h)))).sum()
     newJ = (np.multiply(np.multiply(roiJ,weight),bk.kernel(np.multiply((posJ-roiJ)/h,(posJ-roiJ)/h)))).sum() / (np.multiply(weight,bk.kernel(np.multiply((posJ-roiJ)/h,(posJ-roiJ)/h)))).sum()
@@ -115,7 +116,7 @@ def prediction_RGB(im, posI, posJ,radius,q):
     new_coeff = b_coeff_RGB(p,q)
     while new_coeff < old_coeff and ((newI-oldI)**2 + (newJ-oldJ)**2)>3:
         newI, newJ = int(0.5*(newI+oldI)), int(0.5*(newJ+oldJ))
-        p,bins = distribution_RGB(im,newI,newJ)
+        p,bins = distribution_RGB(im,newI,newJ,roi)
         new_coeff = b_coeff_RGB(p,q)
     
     return newI,newJ

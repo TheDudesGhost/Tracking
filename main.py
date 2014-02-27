@@ -21,18 +21,16 @@ while(video.isOpened()):
     video.display_roi(im)
     video.display(im)
     # TODO Make computation
-    if v.is_radius_nonzero(video.selection):
-        i,j,r = video.selection
-        
-        posI,posJ = 45,50
-        oldI,oldJ = 50,50
-        roi = geo.region.roi_cercle(im[:,:,0],oldI,oldJ,radius)   
-        q,bins = distribution_RGB(im,oldI,oldJ,roi)
-        posI,posJ = prediction_RGB(im,posI,posJ,radius,q)
-        prediction_RGB(im, im,i,j,r,i,j)
+    if v.is_radius_nonzero(video.getSelection()):
+        i,j,r = video.getSelection()
+        roi = geo.region.roi_cercle(im[:,:,0],i,j,r)   
+        q,bins = ms.distribution_RGB(video.getPrevious(),i,j,roi)
+        i,j = ms.prediction_RGB(im,i,j,r,q)
+        print i,j
+        video.setSelection(i,j,r)
     # TODO Uncomment when computation is done
     # video.setSelection(i, j, r)        
-    
+    video.setPrevious(im)
     if not video.check_event(im):
         break
 
