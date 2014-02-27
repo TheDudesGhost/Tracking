@@ -13,6 +13,8 @@ import mean_shift.base.histogram as bh
 import geometry as geo
 import video as v
 
+start = False
+
 video = v.Video('./resource/Juggling.mp4')
 while(video.isOpened()):
     ret, im = video.getFrame()
@@ -21,13 +23,19 @@ while(video.isOpened()):
     video.display_roi(im)
     video.display(im)
     # TODO Make computation
-    if v.is_radius_nonzero(video.getSelection()):
+    if v.is_radius_nonzero(video.getSelection()) and not video.isPaused():
+        if start==False :
+            start=True
+            i,j,r = video.getSelection()
+            roi = geo.region.roi_cercle(im[:,:,0],i,j,r)   
+            q,bins = ms.distribution_RGB(video.getPrevious(),i,j,roi)
+        
         i,j,r = video.getSelection()
-        roi = geo.region.roi_cercle(im[:,:,0],i,j,r)   
-        q,bins = ms.distribution_RGB(video.getPrevious(),i,j,roi)
+        #roi = geo.region.roi_cercle(im[:,:,0],i,j,r)   
+        #q,bins = ms.distribution_RGB(video.getPrevious(),i,j,roi)
         i,j = ms.prediction_RGB(im,i,j,r,q)
-        print i,j
         video.setSelection(i,j,r)
+
     # TODO Uncomment when computation is done
     # video.setSelection(i, j, r)        
     video.setPrevious(im)

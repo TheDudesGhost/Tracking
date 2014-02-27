@@ -19,13 +19,13 @@ def plotHist(dataIn):
 # Retourne l'index du bin auquel appartient la couleur
 def bin_please(couleur,bins):
     result = []
-
     for i,coul in enumerate(couleur):
-        tmp = (bins <= coul)
+        tmp = (bins <= coul)*1
         result.append(tmp.sum()-1)
     return result
     
 def bin_RGB(couleur_RGB,bins):
+    #couleur_RGB = couleur_RGB.astype(float)
     index_R = bin_please(couleur_RGB[0],bins)
     index_G = bin_please(couleur_RGB[1],bins)
     index_B = bin_please(couleur_RGB[2],bins)
