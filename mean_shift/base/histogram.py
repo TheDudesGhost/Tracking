@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 
 def histo(dataIn, weights=None, bins=32, range_=(0,256)):
     histo, bins = np.histogram(dataIn, bins, range_, weights=weights)
-    histo = histo/ histo.sum()
+    #histo = histo/ histo.sum()
     return histo, bins
 
 # Affiche un histogramme cree par numpy

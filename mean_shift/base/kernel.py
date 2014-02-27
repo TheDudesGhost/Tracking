@@ -33,7 +33,10 @@ def kernel_centre(im, ci, cj, normal=1):
 
     
 if __name__ == "__main__":
-    im = np.zeros((25,25))
-    ker = kernel_centre(im,12,12)
-    plt.imshow(ker)
-    plt.show()
+    m=np.matrix([[1,1],[2,2],[3,3],[4,4]])
+    print m
+    print m.shape
+#    im = np.zeros((25,25))
+#    ker = kernel_centre(im,12,12)
+#    plt.imshow(ker)
+#    plt.show()

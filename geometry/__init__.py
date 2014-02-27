@@ -1,3 +1,2 @@
-from cercle import *
-from ellipse import *
-from quad import *
+from func import *
+import region

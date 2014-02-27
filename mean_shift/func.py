@@ -9,32 +9,30 @@ requises pour le calcul de la mean shift
 from math import *
 import matplotlib.pyplot as plt
 import numpy as np
-import scipy.misc
+import scipy.misc as util
 from pylab import *
 import base.kernel as bk          
 import base.histogram as bh
 
 import scipy.ndimage as ndimage
 
-radius = 20
+radius = 30
 
 
 # Histogramme pondere du modele par le kernel choisi
-def distribution(im,ci,cj,raw_ker):
-    rawdata = geo.roi_cercle(im,ci,cj,radius, raw=1)[2]
+def distribution(im,ci,cj,roi):
+    rawdata = geo.rawdata(im,roi)
+    ker = bk.kernel_centre(im,ci,cj)
+    raw_ker = geo.rawdata(ker,roi)
     histo,bins = bh.histo(rawdata,weights=raw_ker)   
     return histo,bins
 
 # Test OK
-def distribution_RGB(im_rgb,ci,cj):
-    # Calcul du kernel
-    ker = bk.kernel_centre(im_rgb[:,:,0],ci,cj)
-    
-    raw_ker = geo.roi_cercle(ker,ci,cj,radius, raw=1)[2]
+def distribution_RGB(im_rgb,ci,cj,roi):
     # Calcul des distributions    
-    histo_R, bins = distribution(im_rgb[:,:,0],ci,cj,raw_ker) 
-    histo_G, bins = distribution(im_rgb[:,:,1],ci,cj,raw_ker)
-    histo_B, bins = distribution(im_rgb[:,:,2],ci,cj,raw_ker)
+    histo_R, bins = distribution(im_rgb[:,:,0],ci,cj,roi) 
+    histo_G, bins = distribution(im_rgb[:,:,1],ci,cj,roi)
+    histo_B, bins = distribution(im_rgb[:,:,2],ci,cj,roi)
     return [histo_R,histo_G,histo_B], bins
 
 # Coefficient de Bhattacharyya
@@ -77,9 +75,14 @@ def weights_RGB (p,q,index):
 
 #Prediction du nouvel emplacement de y
 def prediction (im,posI,posJ):
-    p,binsP = distribution(im,posI,posJ)
-    q,binsQ = distribution(im,200,320)    
-    roiI,roiJ,rawdata = geo.roi_cercle(im,posI,posJ,radius)
+    #Distribution
+    roi = geo.region.roi_cercle(im,posI,posJ,radius)
+    p,binsP = distribution(im,posI,posJ,roi)
+    roi_origine = geo.region.roi_cercle(im,50,50,radius)
+    q,binsQ = distribution(im,50,50,roi_origine)  
+    # Weights
+    roiI,roiJ = geo.roi(im,roi)
+    rawdata = geo.rawdata(im,roi)
     h = roiI.shape[0]
     weight = weights(p,q,bh.bin_please(rawdata,binsP))
     #Calcul sur les X
@@ -91,8 +94,9 @@ def prediction (im,posI,posJ):
 def prediction_RGB(im, model, posI, posJ):
     oldI,oldJ = posI,posJ
     # Distributions (histogrammes) & Bhattacharyya 
-    p,bins = distribution_RGB(im,posI,posJ)
-    q,bins = distribution_RGB(model,374,456)
+    roi = geo.region.roi_cercle(im,posI,posJ,roi)
+    p,bins = distribution_RGB(im,posI,posJ,roi)
+    q,bins = distribution_RGB(model,374,456,roi)
     old_coeff = b_coeff_RGB(p,q)    
     # Weights
     roiI,roiJ,rawR = geo.roi_cercle(im[:,:,0],posI,posJ,radius) # roiI -> colonnes
@@ -124,12 +128,11 @@ def prediction_RGB(im, model, posI, posJ):
 ##############################################################################    
     
 def test_algo():
-    J,I = np.meshgrid(np.arange(-50,51),np.arange(-50,51))
-    J,I = 100-np.abs(J),100-np.abs(I)
-    im = np.multiply(I,J)
-      
-    plt.imshow(im)
-    plt.show()
+    im = util.imread('../resource/test.pgm')
+    im=im.astype(float)
+    posI,posJ = 45,50
+    
+    print prediction(im,posI,posJ)
 
     
 if __name__ == "__main__":
