@@ -23,8 +23,8 @@ def kernel(x, normal=1):
     return kernel
     
 # Calcul la fonction kernel au centre (cx,cy) pour l'image im
-def kernel_centre(im, ci, cj, normal=1):
-    H,W = im.shape    
+def kernel_centre(im_shape, ci, cj, normal=1):
+    H,W = im_shape    
     J,I = np.meshgrid(np.arange(-cj,W-cj),np.arange(-ci,H-ci))    
     k = kernel((np.multiply(I,I) + np.multiply(J,J)),normal)
     return k

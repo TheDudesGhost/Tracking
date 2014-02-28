@@ -6,8 +6,8 @@ from scipy.misc import lena
 
 # Retourne les coordonnees du cercle dans une image
 # TODO : optimiser !
-def roi_cercle(im,ci,cj,r):
-    H,W = im.shape
+def roi_cercle(im_shape,ci,cj,r):
+    H,W = im_shape
     J,I = np.meshgrid(np.arange(0,W),np.arange(0,H))
     roi = (((J-cj)**2 + (I-ci)**2) <= (r**2 + 1)) * 1
     return roi

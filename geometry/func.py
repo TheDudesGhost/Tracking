@@ -9,8 +9,8 @@ import numpy as np
 
 # Renvoie 2 vecteurs contenant les coordonnees des points de l'image
 # appartenant a la roi
-def roi(im,roi):
-    H,W = im.shape
+def roi(im_shape,roi):
+    H,W = im_shape
     J,I = np.meshgrid(np.arange(0,W),np.arange(0,H))    
     
     roiI,roiJ = (I+1)*roi, (J+1)*roi

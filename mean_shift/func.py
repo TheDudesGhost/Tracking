@@ -12,6 +12,7 @@ import numpy as np
 import scipy.misc as util
 import base.kernel as bk          
 import base.histogram as bh
+import base
 
 import scipy.ndimage as ndimage
 
@@ -19,20 +20,17 @@ import scipy.ndimage as ndimage
 
 
 # Histogramme pondere du modele par le kernel choisi
-def distribution(im,ci,cj,roi):
+def distribution(im,roi,raw_ker):
     rawdata = geo.rawdata(im,roi)
-    ker = bk.kernel_centre(im,ci,cj)
-    raw_ker = geo.rawdata(ker,roi)
     histo,bins = bh.histo(rawdata,weights=raw_ker)   
     return histo,bins
 
 # Test OK
-def distribution_RGB(im_rgb,ci,cj,roi):
-    im_rgb = im_rgb.astype(float)
-    # Calcul des distributions    
-    histo_R, bins = distribution(im_rgb[:,:,0],ci,cj,roi) 
-    histo_G, bins = distribution(im_rgb[:,:,1],ci,cj,roi)
-    histo_B, bins = distribution(im_rgb[:,:,2],ci,cj,roi)
+def distribution_RGB(im_rgb,roi,raw_ker):
+    im_rgb = im_rgb.astype(float)   
+    histo_R, bins = distribution(im_rgb[:,:,0],roi,raw_ker) 
+    histo_G, bins = distribution(im_rgb[:,:,1],roi,raw_ker)
+    histo_B, bins = distribution(im_rgb[:,:,2],roi,raw_ker)
     return [histo_R,histo_G,histo_B], bins
 
 # Coefficient de Bhattacharyya
@@ -91,39 +89,73 @@ def prediction (im,posI,posJ):
     return newI,newJ
 
     
-def prediction_RGB(im, posI, posJ,radius,q):
-    oldI,oldJ = posI,posJ
-    
-    # Distributions (histogrammes) & Bhattacharyya 
-    roi = geo.region.roi_cercle(im[:,:,0],posI,posJ,radius)
-    p,bins = distribution_RGB(im,posI,posJ,roi)
-    old_coeff = b_coeff_RGB(p,q)    
-    # Weights
+#def prediction_RGB(im, posI, posJ,radius,q):
+#    oldI,oldJ = posI,posJ
+#
+#    # Distributions (histogrammes) & Bhattacharyya 
+#    roi = geo.region.roi_cercle(im[:,:,0],posI,posJ,radius)
+#    p,bins = distribution_RGB(im,posI,posJ,roi)
+#    old_coeff = b_coeff_RGB(p,q)    
+#    # Weights
+#    im = im.astype(float)
+#    roiI,roiJ = geo.roi(im[:,:,0],roi)
+#    rawR = geo.rawdata(im[:,:,0],roi) # roiI -> colonnes
+#    rawG = geo.rawdata(im[:,:,1],roi)
+#    rawB = geo.rawdata(im[:,:,2],roi)
+#    h = roiI.shape[0]
+#    weight = weights_RGB(p,q,bh.bin_RGB([rawR,rawG,rawB],bins))
+#    # Update Y1
+#    newI = (np.multiply(np.multiply(roiI,weight),bk.kernel(np.multiply((posI-roiI)/h,(posI-roiI)/h)))).sum() / (np.multiply(weight,bk.kernel(np.multiply((posI-roiI)/h,(posI-roiI)/h)))).sum()
+#    newJ = (np.multiply(np.multiply(roiJ,weight),bk.kernel(np.multiply((posJ-roiJ)/h,(posJ-roiJ)/h)))).sum() / (np.multiply(weight,bk.kernel(np.multiply((posJ-roiJ)/h,(posJ-roiJ)/h)))).sum()
+#    newI, newJ = int(newI), int(newJ)    
+#    # Test
+#    roi = geo.region.roi_cercle(im[:,:,0],newI,newJ,radius)
+#    p,bins = distribution_RGB(im,newI,newJ,roi)
+#    new_coeff = b_coeff_RGB(p,q)
+#    while new_coeff < old_coeff and ((newI-oldI)**2 + (newJ-oldJ)**2)>2:
+#        newI, newJ = int(0.5*(newI+oldI)), int(0.5*(newJ+oldJ))
+#        p,bins = distribution_RGB(im,newI,newJ,roi)
+#        new_coeff = b_coeff_RGB(p,q)
+#    
+#    return newI,newJ
+
+def prediction_RGB(im, etat_courant):
+    # Initialisation
+    posI,posJ,radius = etat_courant.getSelection()
+    raw_ker = etat_courant.getKernel()
+    q = etat_courant.getModel()
+    # Distribution (histogramme) & Bhattacharyya
     im = im.astype(float)
-    roiI,roiJ = geo.roi(im[:,:,0],roi)
+    roi = geo.region.roi_cercle(im[:,:,0].shape,posI,posJ,radius)
+    p,bins = distribution_RGB(im,roi,raw_ker)
+    old_coeff = b_coeff_RGB(p,q)    
+    # Weights im = im.astype(float)
+    roiI,roiJ = geo.roi(im[:,:,0].shape,roi)
     rawR = geo.rawdata(im[:,:,0],roi) # roiI -> colonnes
     rawG = geo.rawdata(im[:,:,1],roi)
     rawB = geo.rawdata(im[:,:,2],roi)
     h = roiI.shape[0]
     weight = weights_RGB(p,q,bh.bin_RGB([rawR,rawG,rawB],bins))
     # Update Y1
-    newI = (np.multiply(np.multiply(roiI,weight),bk.kernel(np.multiply((posI-roiI)/h,(posI-roiI)/h)))).sum() / (np.multiply(weight,bk.kernel(np.multiply((posI-roiI)/h,(posI-roiI)/h)))).sum()
-    newJ = (np.multiply(np.multiply(roiJ,weight),bk.kernel(np.multiply((posJ-roiJ)/h,(posJ-roiJ)/h)))).sum() / (np.multiply(weight,bk.kernel(np.multiply((posJ-roiJ)/h,(posJ-roiJ)/h)))).sum()
+#    newI = (np.multiply(np.multiply(roiI,weight),bk.kernel(np.multiply((posI-roiI)/h,(posI-roiI)/h)))).sum() / (np.multiply(weight,bk.kernel(np.multiply((posI-roiI)/h,(posI-roiI)/h)))).sum()
+#    newJ = (np.multiply(np.multiply(roiJ,weight),bk.kernel(np.multiply((posJ-roiJ)/h,(posJ-roiJ)/h)))).sum() / (np.multiply(weight,bk.kernel(np.multiply((posJ-roiJ)/h,(posJ-roiJ)/h)))).sum()
+    temp_I = np.multiply(bk.kernel(np.multiply((posI-roiI)/h,(posI-roiI)/h)),weight) 
+    temp_J = np.multiply(bk.kernel(np.multiply((posJ-roiJ)/h,(posJ-roiJ)/h)),weight)
+    newI = (np.multiply(temp_I,roiI)).sum() / temp_I.sum()
+    newJ = (np.multiply(temp_J,roiJ)).sum() / temp_J.sum()    
     newI, newJ = int(newI), int(newJ)    
     # Test
-    roi = geo.region.roi_cercle(im[:,:,0],newI,newJ,radius)
-    p,bins = distribution_RGB(im,newI,newJ,roi)
+    roi = geo.region.roi_cercle(im[:,:,0].shape,newI,newJ,radius)
+    p,bins = distribution_RGB(im,roi,raw_ker)
     new_coeff = b_coeff_RGB(p,q)
-    while new_coeff < old_coeff and ((newI-oldI)**2 + (newJ-oldJ)**2)>2:
-        newI, newJ = int(0.5*(newI+oldI)), int(0.5*(newJ+oldJ))
-        p,bins = distribution_RGB(im,newI,newJ,roi)
+    while new_coeff < old_coeff and ((newI-posI)**2 + (newJ-posJ)**2)>2:
+        newI, newJ = int(0.5*(newI+posI)), int(0.5*(newJ+posJ))
+        roi = geo.region.roi_cercle(im[:,:,0].shape,newI,newJ,radius)
+        p,bins = distribution_RGB(im,roi,raw_ker)
         new_coeff = b_coeff_RGB(p,q)
     
     return newI,newJ
     
-
-    
-    plt.show()
     
   
 ##############################################################################
@@ -134,30 +166,7 @@ def test_algo():
     a = np.array(np.arange(0,256))
     p,bins = np.histogram(a,256,(0,256))
     print p
-    index = bh.bin_RGB([a,a,a],bins)
-    print index[1]
-#    radius = 100   
-#    im = util.imread('../resource/me.jpg')
-#    im=im.astype(float)
-#    posI,posJ = 300,300
-#    oldI,oldJ = 301,300
-#    roi = geo.region.roi_cercle(im[:,:,0],oldI,oldJ,radius)   
-#    q,bins = distribution_RGB(im,oldI,oldJ,roi)
-#    p,bins = distribution_RGB(im,posI,posJ,roi)
-#    
-#    plt.subplot(611)
-#    plt.plot(p[0])
-#    plt.subplot(612)
-#    plt.plot(q[0])
-#    plt.subplot(613)
-#    plt.plot(p[1])
-#    plt.subplot(614)
-#    plt.plot(q[1])
-#    plt.subplot(615)
-#    plt.plot(p[2])
-#    plt.subplot(616)
-#    plt.plot(q[2])
-#    plt.show()
+    
     
 if __name__ == "__main__":
     import sys
