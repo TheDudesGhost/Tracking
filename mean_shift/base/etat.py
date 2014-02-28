@@ -9,9 +9,10 @@ ker - noyau
 
 class Etat:
     
-    def __init__(self,i,j,r,ker,q):
+    def __init__(self,i,j,r,ker,ker_target,q):
         self.selection = (i,j,r)
         self.ker = ker
+        self.ker_target = ker_target
         self.q = q
         
     def setSelection(self,i,j,radius):
@@ -31,6 +32,12 @@ class Etat:
         
     def getKernel(self):
         return self.ker
+    
+    def setKernelTarget(self,raw_ker_target):
+        self.ker_target = raw_ker_target
+        
+    def getKernelTarget(self):
+        return self.ker_target
         
 
         

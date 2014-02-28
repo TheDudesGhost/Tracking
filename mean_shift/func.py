@@ -67,7 +67,7 @@ def weights_RGB (p,q,index):
     wR = weights(p[0],q[0],index[0])
     wG = weights(p[1],q[1],index[1])
     wB = weights(p[2],q[2],index[2])
-    return np.multiply(np.multiply(wR,wG),wB)#wR+wG+wB
+    return wR+wG+wB#np.multiply(np.multiply(wR,wG),wB)#
     
 
 
@@ -123,6 +123,7 @@ def prediction_RGB(im, etat_courant):
     # Initialisation
     posI,posJ,radius = etat_courant.getSelection()
     raw_ker = etat_courant.getKernel()
+    raw_ker_target = etat_courant.getKernelTarget()
     q = etat_courant.getModel()
     # Distribution (histogramme) & Bhattacharyya
     im = im.astype(float)
@@ -134,13 +135,15 @@ def prediction_RGB(im, etat_courant):
     rawR = geo.rawdata(im[:,:,0],roi) # roiI -> colonnes
     rawG = geo.rawdata(im[:,:,1],roi)
     rawB = geo.rawdata(im[:,:,2],roi)
-    h = roiI.shape[0]
+    #h = roiI.shape[0]
     weight = weights_RGB(p,q,bh.bin_RGB([rawR,rawG,rawB],bins))
     # Update Y1
-#    newI = (np.multiply(np.multiply(roiI,weight),bk.kernel(np.multiply((posI-roiI)/h,(posI-roiI)/h)))).sum() / (np.multiply(weight,bk.kernel(np.multiply((posI-roiI)/h,(posI-roiI)/h)))).sum()
-#    newJ = (np.multiply(np.multiply(roiJ,weight),bk.kernel(np.multiply((posJ-roiJ)/h,(posJ-roiJ)/h)))).sum() / (np.multiply(weight,bk.kernel(np.multiply((posJ-roiJ)/h,(posJ-roiJ)/h)))).sum()
-    temp_I = np.multiply(bk.kernel(np.multiply((posI-roiI)/h,(posI-roiI)/h)),weight) 
-    temp_J = np.multiply(bk.kernel(np.multiply((posJ-roiJ)/h,(posJ-roiJ)/h)),weight)
+    #test_temp_I = np.multiply(bk.kernel(np.multiply((posI-roiI)/radius,(posI-roiI)/radius),normal=1),weight) 
+    #test_temp_J = np.multiply(bk.kernel(np.multiply((posJ-roiJ)/radius,(posJ-roiJ)/radius),normal=1),weight)
+    temp_I = np.multiply(raw_ker_target,weight) 
+    temp_J = np.multiply(raw_ker_target,weight)
+
+    
     newI = (np.multiply(temp_I,roiI)).sum() / temp_I.sum()
     newJ = (np.multiply(temp_J,roiJ)).sum() / temp_J.sum()    
     newI, newJ = int(newI), int(newJ)    
@@ -154,6 +157,19 @@ def prediction_RGB(im, etat_courant):
         p,bins = distribution_RGB(im,roi,raw_ker)
         new_coeff = b_coeff_RGB(p,q)
     
+#    plt.subplot(231)
+#    plt.plot(p[0])
+#    plt.subplot(232)
+#    plt.plot(p[1])
+#    plt.subplot(233)
+#    plt.plot(p[2])
+#    plt.subplot(234)
+#    plt.plot(q[0])
+#    plt.subplot(235)
+#    plt.plot(q[1])
+#    plt.subplot(236)
+#    plt.plot(q[2])
+#    plt.show()
     return newI,newJ
     
     
@@ -163,9 +179,9 @@ def prediction_RGB(im, etat_courant):
 ##############################################################################    
     
 def test_algo():
-    a = np.array(np.arange(0,256))
-    p,bins = np.histogram(a,256,(0,256))
-    print p
+    ker = bk.kernel_centre((100,100),50,80,10)
+    plt.imshow(ker)
+    plt.show()
     
     
 if __name__ == "__main__":
@@ -176,10 +192,7 @@ if __name__ == "__main__":
     import geometry as geo    
     
     test_algo()
-#    im = ndimage.imread('../resource/me.jpg')
-#    i,j = 480,370    
-#    i,j = prediction_RGB(im,im,i,j)
-#    print i,j
+
     
     
 

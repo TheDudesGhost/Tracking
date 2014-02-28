@@ -16,11 +16,13 @@ import video as v
 import time
 
 start_time = 0
-etat_courant = b.Etat(0,0,0,0,0)
+etat_courant = b.Etat(0,0,0,0,0,0)
 start = False
 nb_img = 0
 
-video = v.Video('./resource/Juggling.mp4')
+#video = v.Video('./resource/Juggling.mp4')
+video = v.Video(0)
+
 while(video.isOpened()):
     ret, im = video.getFrame()
     if not ret:
@@ -31,20 +33,20 @@ while(video.isOpened()):
     if v.is_radius_nonzero(video.getSelection()) and not video.isPaused():
         if start==False : #Initialisation
             start=True
-            i,j,r = video.getSelection()
+            j,i,r = video.getSelection()
             roi = geo.region.roi_cercle(im[:,:,0].shape,i,j,r)   
-            ker = bk.kernel_centre(im[:,:,0].shape,i,j)
+            ker = bk.kernel_centre(im[:,:,0].shape,i,j,normal=1,h=r)
             raw_ker = geo.rawdata(ker,roi)
             q,bins = ms.distribution_RGB(video.getPrevious(),roi,raw_ker)
-            etat_courant = b.Etat(i,j,r,raw_ker,q)
+            etat_courant = b.Etat(i,j,r,raw_ker,raw_ker,q)
             start_time = time.time()
         
-        i,j,r = video.getSelection()
+        j,i,r = video.getSelection()
         etat_courant.setSelection(i,j,r)
         #roi = geo.region.roi_cercle(im[:,:,0],i,j,r)   
         #q,bins = ms.distribution_RGB(video.getPrevious(),i,j,roi)
         i,j = ms.prediction_RGB(im,etat_courant)
-        video.setSelection(i,j,r)
+        video.setSelection(j,i,r)
         nb_img = nb_img + 1
 
     # TODO Uncomment when computation is done
@@ -58,6 +60,7 @@ end_time = time.time()
 
 
 print "FPS = ",nb_img /(end_time - start_time)
+
 
 
 
