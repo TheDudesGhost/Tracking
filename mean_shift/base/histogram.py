@@ -24,6 +24,14 @@ def bin_please(couleur,bins):
         result.append(tmp.sum()-1)
     return result
     
+# Version optimisee python (mais qui prend plus de temps que la precedente ...)
+def bin_please_opt(couleur,bins):
+    couleur = np.reshape(couleur,(len(couleur),1))
+    bins = np.meshgrid(bins,np.arange(couleur.shape[0]))[0]
+    lut = (bins <= couleur)*1
+    lut = np.dot(lut,np.ones(lut.shape[1]))-1
+    return lut
+    
 def bin_RGB(couleur_RGB,bins):
     #couleur_RGB = couleur_RGB.astype(float)
     index_R = bin_please(couleur_RGB[0],bins)
@@ -34,3 +42,11 @@ def bin_RGB(couleur_RGB,bins):
 ##############################################################################
 ################################      TESTS       ############################
 ##############################################################################
+
+if __name__ == "__main__":
+    import time
+    
+
+
+    
+    

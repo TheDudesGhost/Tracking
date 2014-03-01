@@ -16,12 +16,12 @@ import video as v
 import time
 
 start_time = 0
-etat_courant = b.Etat(0,0,0,0,0,0)
+etat_courant = b.Etat(0,0,0,0,0)
 start = False
 nb_img = 0
 
-#video = v.Video('./resource/Juggling.mp4')
-video = v.Video(0)
+video = v.Video('./resource/Juggling.mp4')
+#video = v.Video(0)
 
 while(video.isOpened()):
     ret, im = video.getFrame()
@@ -34,24 +34,21 @@ while(video.isOpened()):
         if start==False : #Initialisation
             start=True
             j,i,r = video.getSelection()
+            print "Test",i,j,r
             roi = geo.region.roi_cercle(im[:,:,0].shape,i,j,r)   
-            ker = bk.kernel_centre(im[:,:,0].shape,i,j,normal=1,h=r)
+            ker = bk.kernel_centre(im[:,:,0].shape,i,j,normal=0,h=r)
             raw_ker = geo.rawdata(ker,roi)
-            q,bins = ms.distribution_RGB(video.getPrevious(),roi,raw_ker)
-            etat_courant = b.Etat(i,j,r,raw_ker,raw_ker,q)
+            q,bins = ms.distribution_RGB(im,roi,raw_ker)
+            etat_courant = b.Etat(i,j,r,raw_ker,q)
             start_time = time.time()
         
         j,i,r = video.getSelection()
         etat_courant.setSelection(i,j,r)
-        #roi = geo.region.roi_cercle(im[:,:,0],i,j,r)   
-        #q,bins = ms.distribution_RGB(video.getPrevious(),i,j,roi)
         i,j = ms.prediction_RGB(im,etat_courant)
         video.setSelection(j,i,r)
         nb_img = nb_img + 1
 
-    # TODO Uncomment when computation is done
-    # video.setSelection(i, j, r)        
-    video.setPrevious(im)
+    # TODO Uncomment when computation is done       
     if not video.check_event(im):
         break
 

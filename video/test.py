@@ -62,7 +62,7 @@ class Video:
         cv2.imshow(self.wName, im)
     
     def check_event(self, im):
-        key = cv2.waitKey(25) & 0xFF          
+        key = cv2.waitKey(50) & 0xFF          
             
         # Use Q to quit
         if key == ord('q'):

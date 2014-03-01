@@ -88,46 +88,17 @@ def prediction (im,posI,posJ):
     newJ = (np.multiply(np.multiply(roiJ,weight),bk.kernel(np.multiply((posJ-roiJ)/h,(posJ-roiJ)/h)))).sum() / (np.multiply(weight,bk.kernel(np.multiply((posJ-roiJ)/h,(posJ-roiJ)/h)))).sum()
     return newI,newJ
 
-    
-#def prediction_RGB(im, posI, posJ,radius,q):
-#    oldI,oldJ = posI,posJ
-#
-#    # Distributions (histogrammes) & Bhattacharyya 
-#    roi = geo.region.roi_cercle(im[:,:,0],posI,posJ,radius)
-#    p,bins = distribution_RGB(im,posI,posJ,roi)
-#    old_coeff = b_coeff_RGB(p,q)    
-#    # Weights
-#    im = im.astype(float)
-#    roiI,roiJ = geo.roi(im[:,:,0],roi)
-#    rawR = geo.rawdata(im[:,:,0],roi) # roiI -> colonnes
-#    rawG = geo.rawdata(im[:,:,1],roi)
-#    rawB = geo.rawdata(im[:,:,2],roi)
-#    h = roiI.shape[0]
-#    weight = weights_RGB(p,q,bh.bin_RGB([rawR,rawG,rawB],bins))
-#    # Update Y1
-#    newI = (np.multiply(np.multiply(roiI,weight),bk.kernel(np.multiply((posI-roiI)/h,(posI-roiI)/h)))).sum() / (np.multiply(weight,bk.kernel(np.multiply((posI-roiI)/h,(posI-roiI)/h)))).sum()
-#    newJ = (np.multiply(np.multiply(roiJ,weight),bk.kernel(np.multiply((posJ-roiJ)/h,(posJ-roiJ)/h)))).sum() / (np.multiply(weight,bk.kernel(np.multiply((posJ-roiJ)/h,(posJ-roiJ)/h)))).sum()
-#    newI, newJ = int(newI), int(newJ)    
-#    # Test
-#    roi = geo.region.roi_cercle(im[:,:,0],newI,newJ,radius)
-#    p,bins = distribution_RGB(im,newI,newJ,roi)
-#    new_coeff = b_coeff_RGB(p,q)
-#    while new_coeff < old_coeff and ((newI-oldI)**2 + (newJ-oldJ)**2)>2:
-#        newI, newJ = int(0.5*(newI+oldI)), int(0.5*(newJ+oldJ))
-#        p,bins = distribution_RGB(im,newI,newJ,roi)
-#        new_coeff = b_coeff_RGB(p,q)
-#    
-#    return newI,newJ
+
 
 def prediction_RGB(im, etat_courant):
     # Initialisation
     posI,posJ,radius = etat_courant.getSelection()
     raw_ker = etat_courant.getKernel()
-    raw_ker_target = etat_courant.getKernelTarget()
     q = etat_courant.getModel()
     # Distribution (histogramme) & Bhattacharyya
     im = im.astype(float)
     roi = geo.region.roi_cercle(im[:,:,0].shape,posI,posJ,radius)
+    print posI, posJ, radius
     p,bins = distribution_RGB(im,roi,raw_ker)
     old_coeff = b_coeff_RGB(p,q)    
     # Weights im = im.astype(float)
@@ -138,16 +109,13 @@ def prediction_RGB(im, etat_courant):
     #h = roiI.shape[0]
     weight = weights_RGB(p,q,bh.bin_RGB([rawR,rawG,rawB],bins))
     # Update Y1
-    #test_temp_I = np.multiply(bk.kernel(np.multiply((posI-roiI)/radius,(posI-roiI)/radius),normal=1),weight) 
-    #test_temp_J = np.multiply(bk.kernel(np.multiply((posJ-roiJ)/radius,(posJ-roiJ)/radius),normal=1),weight)
-    temp_I = np.multiply(raw_ker_target,weight) 
-    temp_J = np.multiply(raw_ker_target,weight)
-
-    
+    ######### TEST ############
+    temp_I = weight #temp_I = np.multiply(raw_ker_target,weight)
+    temp_J = weight #temp_J = np.multiply(raw_ker_target,weight)
     newI = (np.multiply(temp_I,roiI)).sum() / temp_I.sum()
     newJ = (np.multiply(temp_J,roiJ)).sum() / temp_J.sum()    
     newI, newJ = int(newI), int(newJ)    
-    # Test
+    # Test Bhattacharrya
     roi = geo.region.roi_cercle(im[:,:,0].shape,newI,newJ,radius)
     p,bins = distribution_RGB(im,roi,raw_ker)
     new_coeff = b_coeff_RGB(p,q)
@@ -157,18 +125,30 @@ def prediction_RGB(im, etat_courant):
         p,bins = distribution_RGB(im,roi,raw_ker)
         new_coeff = b_coeff_RGB(p,q)
     
-#    plt.subplot(231)
+#    plt.subplot(241)
 #    plt.plot(p[0])
-#    plt.subplot(232)
+#    plt.title('target - R')
+#    plt.subplot(242)
 #    plt.plot(p[1])
-#    plt.subplot(233)
+#    plt.title('target - G')
+#    plt.subplot(243)
 #    plt.plot(p[2])
-#    plt.subplot(234)
+#    plt.title('target - B')
+#    plt.subplot(244)
+#    plt.plot(old_coeff)
+#    plt.title('Old Bhattacharyya')
+#    plt.subplot(245)
 #    plt.plot(q[0])
-#    plt.subplot(235)
+#    plt.title('modele - R')
+#    plt.subplot(246)
 #    plt.plot(q[1])
-#    plt.subplot(236)
+#    plt.title('modele - G')
+#    plt.subplot(247)
 #    plt.plot(q[2])
+#    plt.title('modele - B')
+#    plt.subplot(248)
+#    plt.plot(new_coeff)
+#    plt.title('New Bhattacharyya')
 #    plt.show()
     return newI,newJ
     
