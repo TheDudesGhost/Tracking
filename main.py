@@ -34,9 +34,8 @@ while(video.isOpened()):
         if start==False : #Initialisation
             start=True
             j,i,r = video.getSelection()
-            print "Test",i,j,r
             roi = geo.region.roi_cercle(im[:,:,0].shape,i,j,r)   
-            ker = bk.kernel_centre(im[:,:,0].shape,i,j,normal=0,h=r)
+            ker = bk.kernel_centre(im[:,:,0].shape,i,j,normal=1,h=r)
             raw_ker = geo.rawdata(ker,roi)
             q,bins = ms.distribution_RGB(im,roi,raw_ker)
             etat_courant = b.Etat(i,j,r,raw_ker,q)

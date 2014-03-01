@@ -98,7 +98,6 @@ def prediction_RGB(im, etat_courant):
     # Distribution (histogramme) & Bhattacharyya
     im = im.astype(float)
     roi = geo.region.roi_cercle(im[:,:,0].shape,posI,posJ,radius)
-    print posI, posJ, radius
     p,bins = distribution_RGB(im,roi,raw_ker)
     old_coeff = b_coeff_RGB(p,q)    
     # Weights im = im.astype(float)
@@ -109,9 +108,8 @@ def prediction_RGB(im, etat_courant):
     #h = roiI.shape[0]
     weight = weights_RGB(p,q,bh.bin_RGB([rawR,rawG,rawB],bins))
     # Update Y1
-    ######### TEST ############
-    temp_I = weight #temp_I = np.multiply(raw_ker_target,weight)
-    temp_J = weight #temp_J = np.multiply(raw_ker_target,weight)
+    temp_I = np.multiply(raw_ker,weight) #temp_I = weight #
+    temp_J = np.multiply(raw_ker,weight) #temp_J = weight #
     newI = (np.multiply(temp_I,roiI)).sum() / temp_I.sum()
     newJ = (np.multiply(temp_J,roiJ)).sum() / temp_J.sum()    
     newI, newJ = int(newI), int(newJ)    
