@@ -42,7 +42,7 @@ class Video:
         if self.drag_start:
             posX, posY = self.drag_start
             radius = distance(self.drag_start, (x, y))
-            self.selection = (posX, posY, radius)
+            self.selection = (posX, posY, radius * 2)
 
     def getFrame(self):
         if self.cap.isOpened():
@@ -56,7 +56,14 @@ class Video:
                 # Une zone a ete selectionnee dans le passe                
                 i, j, radius = self.selection
                 
-                cv2.circle(im, (i, j), int(radius), (255,255,255))
+                # Square:
+                p1 = (int(i - radius / 2), int(j - radius / 2))
+                p2 = (int(i + radius / 2), int(j + radius / 2))
+                
+                cv2.rectangle(im, p1, p2, (255,255,255))
+                
+                # Circle:
+                # cv2.circle(im, (i, j), int(radius), (255,255,255))
 
     def display(self, im):
         cv2.imshow(self.wName, im)
