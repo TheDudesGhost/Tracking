@@ -97,8 +97,8 @@ def prediction_RGB(im, etat_courant):
     q = etat_courant.getModel()
     # Distribution (histogramme) & Bhattacharyya
     im = im.astype(float)
-    #roi = geo.region.roi_cercle(im[:,:,0].shape,posI,posJ,radius)
-    roi = geo.region.roi_quad(im[:,:,0].shape,posI,posJ,radius)
+    roi = geo.region.roi_cercle(im[:,:,0].shape,posI,posJ,radius)
+    #roi = geo.region.roi_quad(im[:,:,0].shape,posI,posJ,radius)
     p,bins = distribution_RGB(im,roi,raw_ker)
     old_coeff = b_coeff_RGB(p,q)    
     # Weights im = im.astype(float)
@@ -120,8 +120,8 @@ def prediction_RGB(im, etat_courant):
     new_coeff = b_coeff_RGB(p,q)
     while new_coeff < old_coeff and ((newI-posI)**2 + (newJ-posJ)**2)>2:
         newI, newJ = int(0.5*(newI+posI)), int(0.5*(newJ+posJ))
-        #roi = geo.region.roi_cercle(im[:,:,0].shape,newI,newJ,radius)
-        roi = geo.region.roi_quad(im[:,:,0].shape,newI,newJ,radius)
+        roi = geo.region.roi_cercle(im[:,:,0].shape,newI,newJ,radius)
+        #roi = geo.region.roi_quad(im[:,:,0].shape,newI,newJ,radius)
         p,bins = distribution_RGB(im,roi,raw_ker)
         new_coeff = b_coeff_RGB(p,q)
     
