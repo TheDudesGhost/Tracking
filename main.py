@@ -34,7 +34,8 @@ while(video.isOpened()):
         if start==False : #Initialisation
             start=True
             j,i,r = video.getSelection()
-            roi = geo.region.roi_cercle(im[:,:,0].shape,i,j,r)   
+            #roi = geo.region.roi_cercle(im[:,:,0].shape,i,j,r)
+            roi = geo.region.roi_quad(im[:,:,0].shape,i,j,r) 
             ker = bk.kernel_centre(im[:,:,0].shape,i,j,normal=1,h=r)
             raw_ker = geo.rawdata(ker,roi)
             q,bins = ms.distribution_RGB(im,roi,raw_ker)
@@ -48,7 +49,7 @@ while(video.isOpened()):
         nb_img = nb_img + 1
 
     # TODO Uncomment when computation is done       
-    if not video.check_event(im):
+    if not video.check_event(im): 
         break
 
 video.end()
